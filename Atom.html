@@ -146,7 +146,7 @@ function animate() {
   circleX.rotation.x += 0.003;
   circleY.rotation.y += 0.003;
   circleZ.rotation.z += 0.003;
-
+  scene.rotation.y += 0.005; // slow rotation of the whole scene
   renderer.render(scene, camera);
 }
 animate();
