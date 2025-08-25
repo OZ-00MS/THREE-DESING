@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>3D Atom</title>
+  <title>3D Atom with Left Half-Ball</title>
   <style>
     body { margin: 0; background: #000; overflow: hidden; }
     canvas { display: block; }
@@ -20,7 +20,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 /* Axes */
-scene.add(new THREE.AxesHelper(5));
+//scene.add(new THREE.AxesHelper(5));
 
 /* Lights */
 scene.add(new THREE.AmbientLight(0xffffff, 0.6));
@@ -38,17 +38,17 @@ const centralBall = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), centralM
 centralBall.position.set(0, 0, 1);
 scene.add(centralBall);
 
-/* Big Balls: 4 blue + 5 red (matches your original layout) */
+/* Big Balls */
 const bigBalls = [
-  { pos: [ 1.2,  0.0,  0.0], mat: blueMat }, // blue
-  { pos: [ 0.0,  1.2,  0.0], mat: blueMat }, // blue
-  { pos: [ 0.0, -1.2,  0.0], mat: blueMat }, // blue
-  { pos: [-1.2,  0.0,  0.0], mat: blueMat }, // blue
-  { pos: [ 0.0,  0.0, -1.5], mat: centralMat }, // red
-  { pos: [ 1.0,  1.0, -1.0], mat: centralMat }, // red
-  { pos: [ 1.0, -1.0, -1.0], mat: centralMat }, // red
-  { pos: [-1.0, -1.0, -1.0], mat: centralMat }, // red
-  { pos: [-1.0,  1.0, -1.0], mat: centralMat }  // red (the one that was missing)
+  { pos: [ 1.2,  0.0,  0.0], mat: blueMat },
+  { pos: [ 0.0,  1.2,  0.0], mat: blueMat },
+  { pos: [ 0.0, -1.2,  0.0], mat: blueMat },
+  { pos: [-1.2,  0.0,  0.0], mat: blueMat },
+  { pos: [ 0.0,  0.0, -1.5], mat: centralMat },
+  { pos: [ 1.0,  1.0, -1.0], mat: centralMat },
+  { pos: [ 1.0, -1.0, -1.0], mat: centralMat },
+  { pos: [-1.0, -1.0, -1.0], mat: centralMat },
+  { pos: [-1.0,  1.0, -1.0], mat: centralMat }
 ];
 bigBalls.forEach(({pos, mat}) => {
   const m = new THREE.Mesh(bigGeom, mat);
@@ -56,7 +56,7 @@ bigBalls.forEach(({pos, mat}) => {
   scene.add(m);
 });
 
-/* Orbit circles (keep your original look) */
+/* Orbit circles */
 function createCircle(radius, segments, plane, color = 0xcccccc) {
   const pts = [];
   for (let i = 0; i <= segments; i++) {
@@ -87,15 +87,32 @@ const ballY = new THREE.Mesh(smallGeom, smallMat);
 const ballZ = new THREE.Mesh(smallGeom, smallMat);
 scene.add(ballX, ballY, ballZ);
 
-/* Animation parameters */
-let angleX = 0, angleY = 0, angleZ = 0;
-
-/* Mouse drag — orbit camera at fixed distance so size stays constant */
+const membraneGeom = new THREE.SphereGeometry(
+  4,          // radius
+  32, 32,     // width & height segments
+  0, Math.PI, // thetaStart, thetaLength → vertical slice = half sphere
+  0, Math.PI / 1 // phiStart, phiLength → horizontal full
+);
+const membraneMat = new THREE.MeshPhongMaterial({
+  color: 0x00ffff,
+  transparent: true,
+  opacity: 0.2,
+  side: THREE.DoubleSide
+});
+const membrane = new THREE.Mesh(membraneGeom, membraneMat);
+membrane.position.x = -3; // shift to left
+scene.add(membrane);
+membrane.position.x=0;
+membrane.rotation.y=3;
+membrane.scale.x=1.1;
+membrane.scale.y=1.1;
+membrane.scale.z=1.1;
+/* Camera Orbit Control */
 let isDragging = false;
 let prevX = 0, prevY = 0;
-let theta = 0;                  // azimuth
-let phi   = Math.PI / 2;        // polar
-const camRadius = 15;           // fixed distance
+let theta = 0;
+let phi   = Math.PI / 2;
+const camRadius = 15;
 
 function updateCamera() {
   const x = camRadius * Math.sin(phi) * Math.sin(theta);
@@ -118,22 +135,20 @@ document.addEventListener('mousemove', (e) => {
   const dy = e.clientY - prevY;
   prevX = e.clientX; prevY = e.clientY;
 
-  const ROT_SPEED = 0.005;        // sensitivity
+  const ROT_SPEED = 0.005;
   theta -= dx * ROT_SPEED;
   phi   -= dy * ROT_SPEED;
 
-  // Clamp polar angle to avoid flipping
   const EPS = 0.001;
   phi = Math.max(EPS, Math.min(Math.PI - EPS, phi));
-
-  updateCamera();                 // keeps distance constant -> size constant
+  updateCamera();
 });
 
 /* Animate */
+let angleX = 0, angleY = 0, angleZ = 0;
 function animate() {
   requestAnimationFrame(animate);
 
-  // electron orbits
   angleX += 0.05;
   angleY += 0.05;
   angleZ += 0.05;
@@ -142,11 +157,11 @@ function animate() {
   ballY.position.set(radius * Math.cos(angleY), 0, radius * Math.sin(angleY));
   ballZ.position.set(radius * Math.cos(angleZ), radius * Math.sin(angleZ), 0);
 
-  // subtle circle motion (optional)
   circleX.rotation.x += 0.003;
   circleY.rotation.y += 0.003;
   circleZ.rotation.z += 0.003;
-  scene.rotation.y += 0.005; // slow rotation of the whole scene
+  scene.rotation.y += 0.005;
+
   renderer.render(scene, camera);
 }
 animate();
