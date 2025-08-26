@@ -6,9 +6,15 @@
   <style>
     body { margin: 0; background: #000; overflow: hidden; }
     canvas { display: block; }
+    h1 ,h4{
+      color: white;
+      text-align: center  ;
+    }
   </style>
 </head>
 <body>
+  <h1>Atom</h1>
+  <h4>Use mouse drag to rotate the view</h4>
 <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
 <script>
 /* Scene & Renderer */
@@ -103,7 +109,7 @@ const membrane = new THREE.Mesh(membraneGeom, membraneMat);
 membrane.position.x = -3; // shift to left
 scene.add(membrane);
 membrane.position.x=0;
-membrane.rotation.y=3;
+membrane.rotation.y=Math.PI/1;
 membrane.scale.x=1.1;
 membrane.scale.y=1.1;
 membrane.scale.z=1.1;
@@ -141,7 +147,7 @@ document.addEventListener('mousemove', (e) => {
 
   const EPS = 0.001;
   phi = Math.max(EPS, Math.min(Math.PI - EPS, phi));
-  updateCamera();
+  updateCamera();.2
 });
 
 /* Animate */
@@ -172,6 +178,7 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+console.log("Use mouse drag to rotate the view");
 </script>
 </body>
 </html>
